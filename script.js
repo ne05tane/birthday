@@ -14,10 +14,7 @@ birthdayText.innerHTML = `
 const cake = document.getElementById("cake");
 
 const colors = [
-    "green-candle",
     "purple-candle",
-    "blue-candle",
-    "yellow-candle",
 ];
 const CAKE_VISUAL_WIDTH = 35;
 
