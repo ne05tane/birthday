@@ -15,7 +15,8 @@
         color: #555;
       }
 
-.body {
+body {
+  overflow-y: scroll;
 }
 
 #birthdayText {
