@@ -1,131 +1,34 @@
 
-// Read URL params
-const params = new URLSearchParams(window.location.search);
-const name = params.get("name") || "Friend";
-let candleCount = parseInt(params.get("candles")) || 4;
-candleCount = Math.min(Math.max(candleCount, 1), 30);
-
-const birthdayText = document.getElementById("birthdayText");
-birthdayText.innerHTML = `
-    <div id="mainTitle">Happy Birthday, ${name}!</div>
-    <div id="subTitle">Make a wish and blow candles.</div>
-`;
-
-const cake = document.getElementById("cake");
-
-const colors = [
-    "purple-candle",
+const images = [
+    "assets/chocofudge.png",
+    "assets/chocomilk.png",
+    "assets/flowercake.png",
+    "assets/mintcupcake.png",
+    "assets/swissroll.png",
+    
 ];
-const CAKE_VISUAL_WIDTH = 35;
 
-function createCandles(count) {
-cake.innerHTML = "";
-const CANDLE_VISUAL_WIDTH = 2;
-const availableWidth = CAKE_VISUAL_WIDTH;
-const candlesPerRow = 6;
-const rowCount = Math.ceil(count / candlesPerRow);
-const shiftAmount = 4;
+const grid = document.getElementById("grid");
+const preview = document.getElementById("preview");
+const names = document.getElementById("name");
 
-for (let i = 0; i < count; i++) {
-    const candle = document.createElement("div");
-    candle.classList.add("candle");
-    const colorClass = colors[Math.floor(Math.random() * colors.length)];
-    candle.classList.add(colorClass);
-
-    const row = Math.floor(i / candlesPerRow);
-    const col = i % candlesPerRow;
-    const totalCandlesInRow = Math.min(
-    candlesPerRow,
-    count - row * candlesPerRow
-    );
-    const rowSpacing = availableWidth / (totalCandlesInRow + 1);
-
-    const leftBase = rowSpacing * (col + 1) - CANDLE_VISUAL_WIDTH / 2 + 5;
-    const rowShift = row % 2 === 0 ? 0 : shiftAmount;
-
-    candle.style.position = "absolute";
-    candle.style.top = `${10 + row * 3}px`;
-    candle.style.left = `${leftBase - rowShift + 4}px`;
-
-    cake.appendChild(candle);
-}
-}
-
-createCandles(candleCount);
-
-// === Microphone / Blow Detection ===
-async function startMicDetection() {
-try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-    audio: true,
+images.forEach(file => {
+    const btn = document.createElement("button");
+    const img = document.createElement("img");
+    img.src = file;
+    img.alt = file.replace("png", "");
+    btn.appendChild(img);
+    btn.addEventListener("click", () => {
+        preview.src = file;
+        names.textContent = file.split("/").pop().replace(".png", "");
+        grid.querySelectorAll("button").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
     });
-    const audioContext = new (window.AudioContext ||
-    window.webkitAudioContext)();
-    const source = audioContext.createMediaStreamSource(stream);
-    const analyser = audioContext.createAnalyser();
-    analyser.fftSize = 512;
+    grid.appendChild(btn);
 
-    source.connect(analyser);
-
-    const dataArray = new Uint8Array(analyser.frequencyBinCount);
-
-    let blown = false;
-
-    function detectBlow() {
-    analyser.getByteFrequencyData(dataArray);
-
-    let highFreqSum = 0;
-    let lowFreqSum = 0;
-
-    const midpoint = dataArray.length / 2;
-
-    for (let i = 0; i < dataArray.length; i++) {
-        if (i < midpoint) {
-        lowFreqSum += dataArray[i];
-        } else {
-        highFreqSum += dataArray[i];
-        }
-    }
-
-    const highAvg = highFreqSum / (dataArray.length / 2);
-    const lowAvg = lowFreqSum / (dataArray.length / 2);
-
-    const ratio = highAvg / (lowAvg + 1);
-
-    const BLOW_RATIO_THRESHOLD = 0.5;
-
-    if (ratio > BLOW_RATIO_THRESHOLD && !blown) {
-        blown = true;
-        blowOutCandles();
-    }
-
-    requestAnimationFrame(detectBlow);
-    }
-
-    detectBlow();
-} catch (err) {
-    console.error("Mic access error:", err);
-}
-}
-
-function blowOutCandles() {
-const candles = document.querySelectorAll(".candle");
-candles.forEach((candle) => {
-    const delay = Math.random() * 1000;
-    setTimeout(() => {
-    colors.forEach((color) => {
-        if (candle.classList.contains(color)) {
-        candle.classList.add("blown");
-        }
-    });
-    }, delay);
 });
 
-// Update subTitle after short delay
-setTimeout(() => {
-    const subTitle = document.getElementById("subTitle");
-    subTitle.textContent = `Yayy! Wishing you the happiest birthday ever!! 🎉`;
-}, 1200);
-}
 
-startMicDetection();
+
+
+
